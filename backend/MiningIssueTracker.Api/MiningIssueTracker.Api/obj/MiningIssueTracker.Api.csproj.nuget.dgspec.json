@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\rnstk\\OneDrive\\Desktop\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api.csproj": {}
+    "Z:\\home\\soyeon\\mining-issue-tracker\\backend\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\rnstk\\OneDrive\\Desktop\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api.csproj": {
+    "Z:\\home\\soyeon\\mining-issue-tracker\\backend\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\rnstk\\OneDrive\\Desktop\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api.csproj",
+        "projectUniqueName": "Z:\\home\\soyeon\\mining-issue-tracker\\backend\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api.csproj",
         "projectName": "MiningIssueTracker.Api",
-        "projectPath": "C:\\Users\\rnstk\\OneDrive\\Desktop\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api.csproj",
+        "projectPath": "Z:\\home\\soyeon\\mining-issue-tracker\\backend\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api.csproj",
         "packagesPath": "C:\\Users\\rnstk\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\rnstk\\OneDrive\\Desktop\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\obj\\",
+        "outputPath": "Z:\\home\\soyeon\\mining-issue-tracker\\backend\\MiningIssueTracker.Api\\MiningIssueTracker.Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,6 +50,20 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
