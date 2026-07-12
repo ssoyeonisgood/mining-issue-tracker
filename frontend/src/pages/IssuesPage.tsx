@@ -1,23 +1,38 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getIssues } from '../api/issuesApi'
+import { getSites } from '../api/sitesApi'
 import PriorityBadge from '../components/PriorityBadge'
 import StatusBadge from '../components/StatusBadge'
-import { SITES } from '../constants/sites'
 import {
   IssuePriority,
   IssueStatus,
   type Issue,
+  type Site,
 } from '../types/issue'
 import { formatDate } from '../utils/labels'
 
 export default function IssuesPage() {
   const [issues, setIssues] = useState<Issue[]>([])
+  const [sites, setSites] = useState<Site[]>([])
   const [status, setStatus] = useState<string>('')
   const [priority, setPriority] = useState<string>('')
   const [siteId, setSiteId] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadSites() {
+      try {
+        const data = await getSites()
+        setSites(data)
+      } catch {
+        setError('Could not load sites.')
+      }
+    }
+
+    loadSites()
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -90,7 +105,7 @@ export default function IssuesPage() {
             className="w-full rounded-lg border border-slate-300 px-3 py-2"
           >
             <option value="">All</option>
-            {SITES.map((site) => (
+            {sites.map((site) => (
               <option key={site.id} value={site.id}>
                 {site.name}
               </option>

@@ -1,23 +1,58 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createIssue } from '../api/issuesApi'
-import { CATEGORIES, EQUIPMENT, SITES } from '../constants/sites'
-import { IssuePriority, type CreateIssueRequest } from '../types/issue'
+import { getEquipment, getSites } from '../api/sitesApi'
+import { CATEGORIES } from '../constants/sites'
+import { IssuePriority, type CreateIssueRequest, type Equipment, type Site } from '../types/issue'
 
 const inputClass =
   'w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200'
 
 export default function NewIssuePage() {
   const navigate = useNavigate()
-  const [siteId, setSiteId] = useState<number>(1)
+  const [sites, setSites] = useState<Site[]>([])
+  const [equipment, setEquipment] = useState<Equipment[]>([])
+  const [siteId, setSiteId] = useState<number | null>(null)
   const [equipmentId, setEquipmentId] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
-  const equipmentOptions = useMemo(
-    () => EQUIPMENT.filter((item) => item.siteId === siteId),
-    [siteId],
-  )
+  useEffect(() => {
+    async function loadSites() {
+      try {
+        const data = await getSites()
+        setSites(data)
+        setSiteId(data[0]?.id ?? null)
+      } catch {
+        setError('Could not load sites. Is the API running on port 5253?')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadSites()
+  }, [])
+
+  useEffect(() => {
+    if (siteId === null) {
+      setEquipment([])
+      return
+    }
+
+    const selectedSiteId = siteId
+
+    async function loadEquipment() {
+      try {
+        const data = await getEquipment(selectedSiteId)
+        setEquipment(data)
+      } catch {
+        setError('Could not load equipment for the selected site.')
+      }
+    }
+
+    loadEquipment()
+  }, [siteId])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -30,7 +65,7 @@ export default function NewIssuePage() {
       description: String(form.get('description') ?? ''),
       category: String(form.get('category') ?? ''),
       priority: Number(form.get('priority')) as IssuePriority,
-      siteId,
+      siteId: siteId!,
       equipmentId: equipmentId === '' ? null : Number(equipmentId),
       assignedTo: String(form.get('assignedTo') ?? '') || null,
     }
@@ -42,6 +77,18 @@ export default function NewIssuePage() {
       setError('Could not create issue. Check the form values and API connection.')
       setSubmitting(false)
     }
+  }
+
+  if (loading) {
+    return <p className="text-slate-600">Loading form...</p>
+  }
+
+  if (sites.length === 0) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+        {error ?? 'No sites available. Check the API connection.'}
+      </div>
+    )
   }
 
   return (
@@ -104,14 +151,14 @@ export default function NewIssuePage() {
           <label className="block text-sm">
             <span className="mb-1 block font-medium text-slate-700">Site</span>
             <select
-              value={siteId}
+              value={siteId ?? ''}
               onChange={(e) => {
                 setSiteId(Number(e.target.value))
                 setEquipmentId('')
               }}
               className={inputClass}
             >
-              {SITES.map((site) => (
+              {sites.map((site) => (
                 <option key={site.id} value={site.id}>
                   {site.name}
                 </option>
@@ -127,7 +174,7 @@ export default function NewIssuePage() {
               className={inputClass}
             >
               <option value="">None</option>
-              {equipmentOptions.map((item) => (
+              {equipment.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
                 </option>
@@ -149,7 +196,7 @@ export default function NewIssuePage() {
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || siteId === null}
           className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-60"
         >
           {submitting ? 'Submitting...' : 'Create Issue'}
