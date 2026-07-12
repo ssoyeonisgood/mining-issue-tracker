@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: mining-issue-tracker-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./backend/MiningIssueTracker.Api/MiningIssueTracker.Api/Dockerfile
+    dockerContext: ./backend/MiningIssueTracker.Api/MiningIssueTracker.Api
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

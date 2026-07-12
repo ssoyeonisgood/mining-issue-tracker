@@ -14,6 +14,7 @@ frontend/dist-ssr/
 .env
 .env.*
 !.env.example
+!frontend/.env.example
 **/appsettings.Development.json
 **/appsettings.*.local.json
 
