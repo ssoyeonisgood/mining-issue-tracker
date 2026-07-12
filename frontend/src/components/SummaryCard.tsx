@@ -2,13 +2,15 @@ interface SummaryCardProps {
   label: string
   value: string | number
   hint?: string
-  accent?: 'default' | 'warning' | 'success'
+  accent?: 'default' | 'warning' | 'critical' | 'success'
+  delayClass?: string
 }
 
-const accents = {
-  default: 'border-slate-200 bg-white',
-  warning: 'border-amber-200 bg-amber-50',
-  success: 'border-emerald-200 bg-emerald-50',
+const accentClasses = {
+  default: 'metric-card--default',
+  warning: 'metric-card--warning',
+  critical: 'metric-card--critical',
+  success: 'metric-card--success',
 }
 
 export default function SummaryCard({
@@ -16,14 +18,17 @@ export default function SummaryCard({
   value,
   hint,
   accent = 'default',
+  delayClass = '',
 }: SummaryCardProps) {
   return (
-    <div className={`rounded-xl border p-5 shadow-sm ${accents[accent]}`}>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+    <div className={`metric-card animate-metric ${accentClasses[accent]} ${delayClass}`}>
+      <p className="text-[0.625rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-muted)]">
+        {label}
+      </p>
+      <p className="font-mono-data mt-2 text-2xl font-semibold tracking-tight text-[var(--color-navy)]">
         {value}
       </p>
-      {hint ? <p className="mt-1 text-xs text-slate-500">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-xs text-[var(--color-muted)]">{hint}</p> : null}
     </div>
   )
 }

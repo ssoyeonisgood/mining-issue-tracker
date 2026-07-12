@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 import { getIssue, updateIssueStatus } from '../api/issuesApi'
 import PriorityBadge from '../components/PriorityBadge'
 import StatusBadge from '../components/StatusBadge'
+import Alert from '../components/ui/Alert'
+import LoadingState from '../components/ui/LoadingState'
 import { IssueStatus, type Issue } from '../types/issue'
 import { formatDate, statusLabels } from '../utils/labels'
 
@@ -48,17 +50,15 @@ export default function IssueDetailPage() {
   }
 
   if (loading) {
-    return <p className="text-slate-600">Loading issue...</p>
+    return <LoadingState message="Loading issue..." />
   }
 
   if (error || !issue) {
     return (
       <div className="space-y-4">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-          {error ?? 'Issue unavailable'}
-        </div>
-        <Link to="/issues" className="text-sm font-medium text-amber-700 hover:text-amber-800">
-          Back to issues
+        <Alert>{error ?? 'Issue unavailable'}</Alert>
+        <Link to="/issues" className="link-accent">
+          ← Back to issues
         </Link>
       </div>
     )
@@ -66,15 +66,15 @@ export default function IssueDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link to="/issues" className="text-sm font-medium text-amber-700 hover:text-amber-800">
+      <Link to="/issues" className="link-accent animate-fade inline-flex items-center gap-1">
         ← Back to issues
       </Link>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <article className="panel animate-panel delay-1 p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-slate-500">Issue #{issue.id}</p>
-            <h2 className="mt-1 text-2xl font-semibold text-slate-900">{issue.title}</h2>
+            <p className="page-eyebrow">Issue #{issue.id}</p>
+            <h2 className="page-title mt-1">{issue.title}</h2>
           </div>
           <div className="flex gap-2">
             <PriorityBadge priority={issue.priority} />
@@ -82,49 +82,50 @@ export default function IssueDetailPage() {
           </div>
         </div>
 
-        <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+        <dl className="detail-dl mt-6 grid gap-4 sm:grid-cols-2">
           <div>
-            <dt className="text-sm font-medium text-slate-500">Category</dt>
-            <dd className="mt-1 text-slate-900">{issue.category}</dd>
+            <dt>Category</dt>
+            <dd>{issue.category}</dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-slate-500">Site</dt>
-            <dd className="mt-1 text-slate-900">
-              {issue.site?.name ?? `Site ${issue.siteId}`}
-            </dd>
+            <dt>Site</dt>
+            <dd>{issue.site?.name ?? `Site ${issue.siteId}`}</dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-slate-500">Equipment</dt>
-            <dd className="mt-1 text-slate-900">
-              {issue.equipment?.name ?? 'Not specified'}
-            </dd>
+            <dt>Equipment</dt>
+            <dd>{issue.equipment?.name ?? 'Not specified'}</dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-slate-500">Assigned To</dt>
-            <dd className="mt-1 text-slate-900">{issue.assignedTo ?? 'Unassigned'}</dd>
+            <dt>Assigned To</dt>
+            <dd>{issue.assignedTo ?? 'Unassigned'}</dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-slate-500">Created</dt>
-            <dd className="mt-1 text-slate-900">{formatDate(issue.createdAt)}</dd>
+            <dt>Created</dt>
+            <dd className="font-mono-data text-sm">{formatDate(issue.createdAt)}</dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-slate-500">Resolved</dt>
-            <dd className="mt-1 text-slate-900">
+            <dt>Resolved</dt>
+            <dd className="font-mono-data text-sm">
               {issue.resolvedAt ? formatDate(issue.resolvedAt) : '—'}
             </dd>
           </div>
         </dl>
 
-        <div className="mt-6">
-          <h3 className="text-sm font-medium text-slate-500">Description</h3>
-          <p className="mt-2 whitespace-pre-wrap text-slate-800">{issue.description}</p>
+        <div className="mt-6 border-t border-[var(--color-border)] pt-6">
+          <h3 className="field-label">Description</h3>
+          <p className="mt-2 whitespace-pre-wrap leading-relaxed text-[var(--color-text)]">
+            {issue.description}
+          </p>
         </div>
-      </div>
+      </article>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="font-semibold text-slate-900">Update Status</h3>
-        <p className="mt-1 text-sm text-slate-600">
-          Current status: {statusLabels[issue.status]}
+      <section className="panel animate-panel delay-2 p-6">
+        <h3 className="section-title">Update Status</h3>
+        <p className="mt-1 text-sm text-[var(--color-muted)]">
+          Current status:{' '}
+          <span className="font-medium text-[var(--color-text)]">
+            {statusLabels[issue.status]}
+          </span>
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {[IssueStatus.Open, IssueStatus.InProgress, IssueStatus.Resolved].map((status) => (
@@ -133,7 +134,7 @@ export default function IssueDetailPage() {
               type="button"
               disabled={updating || issue.status === status}
               onClick={() => handleStatusChange(status)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className={`status-btn ${issue.status === status ? 'status-btn--active' : ''}`}
             >
               Mark {statusLabels[status]}
             </button>

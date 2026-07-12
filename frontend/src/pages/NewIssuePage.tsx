@@ -2,11 +2,11 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createIssue } from '../api/issuesApi'
 import { getEquipment, getSites } from '../api/sitesApi'
+import Alert from '../components/ui/Alert'
+import LoadingState from '../components/ui/LoadingState'
+import PageHeader from '../components/ui/PageHeader'
 import { CATEGORIES } from '../constants/sites'
 import { IssuePriority, type CreateIssueRequest, type Equipment, type Site } from '../types/issue'
-
-const inputClass =
-  'w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200'
 
 export default function NewIssuePage() {
   const navigate = useNavigate()
@@ -80,50 +80,47 @@ export default function NewIssuePage() {
   }
 
   if (loading) {
-    return <p className="text-slate-600">Loading form...</p>
+    return <LoadingState message="Loading form..." />
   }
 
   if (sites.length === 0) {
-    return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-        {error ?? 'No sites available. Check the API connection.'}
-      </div>
-    )
+    return <Alert>{error ?? 'No sites available. Check the API connection.'}</Alert>
   }
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold text-slate-900">Log New Issue</h2>
-        <p className="mt-1 text-slate-600">
-          Record an equipment failure, safety concern, or maintenance request.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Issue Management"
+        title="Log New Issue"
+        description="Record an equipment failure, safety concern, or maintenance request."
+      />
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
-      >
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium text-slate-700">Title</span>
-          <input name="title" required className={inputClass} placeholder="Crusher failure" />
+      <form onSubmit={handleSubmit} className="panel animate-panel delay-1 space-y-5 p-6">
+        <label className="block">
+          <span className="field-label">Title</span>
+          <input
+            name="title"
+            required
+            className="field-input"
+            placeholder="Crusher failure on shift B"
+          />
         </label>
 
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium text-slate-700">Description</span>
+        <label className="block">
+          <span className="field-label">Description</span>
           <textarea
             name="description"
             required
             rows={4}
-            className={inputClass}
+            className="field-input resize-y"
             placeholder="Describe what happened and any immediate impact."
           />
         </label>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">Category</span>
-            <select name="category" required className={inputClass} defaultValue={CATEGORIES[0]}>
+          <label className="block">
+            <span className="field-label">Category</span>
+            <select name="category" required className="field-input" defaultValue={CATEGORIES[0]}>
               {CATEGORIES.map((category) => (
                 <option key={category} value={category}>
                   {category}
@@ -132,12 +129,12 @@ export default function NewIssuePage() {
             </select>
           </label>
 
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">Priority</span>
+          <label className="block">
+            <span className="field-label">Priority</span>
             <select
               name="priority"
               required
-              className={inputClass}
+              className="field-input"
               defaultValue={IssuePriority.Medium}
             >
               <option value={IssuePriority.Low}>Low</option>
@@ -148,15 +145,15 @@ export default function NewIssuePage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">Site</span>
+          <label className="block">
+            <span className="field-label">Site</span>
             <select
               value={siteId ?? ''}
               onChange={(e) => {
                 setSiteId(Number(e.target.value))
                 setEquipmentId('')
               }}
-              className={inputClass}
+              className="field-input"
             >
               {sites.map((site) => (
                 <option key={site.id} value={site.id}>
@@ -166,12 +163,12 @@ export default function NewIssuePage() {
             </select>
           </label>
 
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">Equipment</span>
+          <label className="block">
+            <span className="field-label">Equipment</span>
             <select
               value={equipmentId}
               onChange={(e) => setEquipmentId(e.target.value)}
-              className={inputClass}
+              className="field-input"
             >
               <option value="">None</option>
               {equipment.map((item) => (
@@ -183,21 +180,17 @@ export default function NewIssuePage() {
           </label>
         </div>
 
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium text-slate-700">Assigned To</span>
-          <input name="assignedTo" className={inputClass} placeholder="John Smith" />
+        <label className="block">
+          <span className="field-label">Assigned To</span>
+          <input name="assignedTo" className="field-input" placeholder="John Smith" />
         </label>
 
-        {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
+        {error ? <Alert>{error}</Alert> : null}
 
         <button
           type="submit"
           disabled={submitting || siteId === null}
-          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-60"
+          className="btn btn-primary w-full sm:w-auto"
         >
           {submitting ? 'Submitting...' : 'Create Issue'}
         </button>

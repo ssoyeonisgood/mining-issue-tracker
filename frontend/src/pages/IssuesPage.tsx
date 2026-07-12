@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getIssues } from '../api/issuesApi'
 import { getSites } from '../api/sitesApi'
 import PriorityBadge from '../components/PriorityBadge'
 import StatusBadge from '../components/StatusBadge'
+import Alert from '../components/ui/Alert'
+import LoadingState from '../components/ui/LoadingState'
+import PageHeader from '../components/ui/PageHeader'
 import {
   IssuePriority,
   IssueStatus,
@@ -13,6 +16,7 @@ import {
 import { formatDate } from '../utils/labels'
 
 export default function IssuesPage() {
+  const navigate = useNavigate()
   const [issues, setIssues] = useState<Issue[]>([])
   const [sites, setSites] = useState<Site[]>([])
   const [status, setStatus] = useState<string>('')
@@ -57,26 +61,24 @@ export default function IssuesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold text-slate-900">Issues</h2>
-          <p className="mt-1 text-slate-600">Track and filter operational issues.</p>
-        </div>
-        <Link
-          to="/issues/new"
-          className="inline-flex items-center justify-center rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600"
-        >
-          Log New Issue
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow="Issue Management"
+        title="Issues"
+        description="Track and filter operational issues across all sites."
+        action={
+          <Link to="/issues/new" className="btn btn-primary">
+            Log New Issue
+          </Link>
+        }
+      />
 
-      <div className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-3">
-        <label className="text-sm">
-          <span className="mb-1 block font-medium text-slate-700">Status</span>
+      <div className="panel animate-panel delay-1 grid gap-4 p-4 sm:grid-cols-3">
+        <label>
+          <span className="field-label">Status</span>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="field-input"
           >
             <option value="">All</option>
             <option value={IssueStatus.Open}>Open</option>
@@ -84,12 +86,12 @@ export default function IssuesPage() {
             <option value={IssueStatus.Resolved}>Resolved</option>
           </select>
         </label>
-        <label className="text-sm">
-          <span className="mb-1 block font-medium text-slate-700">Priority</span>
+        <label>
+          <span className="field-label">Priority</span>
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="field-input"
           >
             <option value="">All</option>
             <option value={IssuePriority.Low}>Low</option>
@@ -97,12 +99,12 @@ export default function IssuesPage() {
             <option value={IssuePriority.High}>High</option>
           </select>
         </label>
-        <label className="text-sm">
-          <span className="mb-1 block font-medium text-slate-700">Site</span>
+        <label>
+          <span className="field-label">Site</span>
           <select
             value={siteId}
             onChange={(e) => setSiteId(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="field-input"
           >
             <option value="">All</option>
             {sites.map((site) => (
@@ -115,65 +117,72 @@ export default function IssuesPage() {
       </div>
 
       {loading ? (
-        <p className="text-slate-600">Loading issues...</p>
+        <LoadingState message="Loading issues..." />
       ) : error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-          {error}
-        </div>
+        <Alert>{error}</Alert>
       ) : issues.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
-          No issues match the selected filters.
-        </div>
+        <Alert variant="empty">No issues match the selected filters.</Alert>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Issue
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Site
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Priority
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Created
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {issues.map((issue) => (
-                <tr key={issue.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3">
-                    <Link
-                      to={`/issues/${issue.id}`}
-                      className="font-medium text-slate-900 hover:text-amber-700"
-                    >
-                      {issue.title}
-                    </Link>
-                    <p className="text-sm text-slate-500">{issue.category}</p>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
-                    {issue.site?.name ?? `Site ${issue.siteId}`}
-                  </td>
-                  <td className="px-4 py-3">
-                    <PriorityBadge priority={issue.priority} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={issue.status} />
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
-                    {formatDate(issue.createdAt)}
-                  </td>
+        <div className="panel animate-panel delay-2 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-elevated)]">
+                  <th className="table-head px-4 py-2.5 text-left">
+                    Issue
+                  </th>
+                  <th className="table-head px-4 py-2.5 text-left">
+                    Site
+                  </th>
+                  <th className="table-head px-4 py-2.5 text-left">
+                    Priority
+                  </th>
+                  <th className="table-head px-4 py-2.5 text-left">
+                    Status
+                  </th>
+                  <th className="hidden table-head px-4 py-2.5 text-left sm:table-cell">
+                    Created
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border)]">
+              {issues.map((issue, index) => (
+                <tr
+                  key={issue.id}
+                  onClick={() => navigate(`/issues/${issue.id}`)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      navigate(`/issues/${issue.id}`)
+                    }
+                  }}
+                  tabIndex={0}
+                  role="link"
+                  aria-label={`View issue: ${issue.title}`}
+                  className="table-row animate-row"
+                  style={{ animationDelay: `${0.28 + index * 0.05}s` }}
+                >
+                    <td className="px-4 py-3.5">
+                      <p className="font-medium text-[var(--color-text)]">{issue.title}</p>
+                      <p className="mt-0.5 text-sm text-[var(--color-muted)]">{issue.category}</p>
+                    </td>
+                    <td className="px-4 py-3.5 text-sm text-[var(--color-muted)]">
+                      {issue.site?.name ?? `Site ${issue.siteId}`}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <PriorityBadge priority={issue.priority} />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <StatusBadge status={issue.status} />
+                    </td>
+                    <td className="hidden px-4 py-3.5 font-mono-data text-xs text-[var(--color-muted)] sm:table-cell">
+                      {formatDate(issue.createdAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
